@@ -22,11 +22,11 @@ export class RetailService {
     })
     this.axios.interceptors.response.use(
       (r) => {
-        // console.log("Result:", r.data)
+        console.log("Result:", r.data)
         return r
       },
       (r) => {
-        // console.log("Error:", r.response.data)
+        console.log("Error:", r.response.data)
         return r
       },
     )
