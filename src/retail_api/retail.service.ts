@@ -13,11 +13,11 @@ export class RetailService {
     this.axios = axios.create({
       baseURL: `${process.env.RETAIL_URL}/api/v5`,
       timeout: 10000,
-      headers: { },
+      headers: {},
     })
 
     this.axios.interceptors.request.use((config) => {
-      // console.log(config.url)
+      config.url = config.url + `&apiKey=${process.env.RETAIL_KEY}`
       return config
     })
     this.axios.interceptors.response.use(
@@ -32,20 +32,28 @@ export class RetailService {
     )
   }
 
-  async orders(filter?: OrdersFilter): Promise<[Order[], RetailPagination]> {
+  async orders(filter?: OrdersFilter): Promise<{ orders: Order[], pagination: RetailPagination}> {
     const params = serialize(filter, '')
+    const resp = await this.axios.get('/orders?' + params)
+    if (!resp.data) throw new Error('RETAIL CRM ERROR')
+
+    const orders = plainToClass(Order, resp.data.orders as Array<any>)
+    const pagination: RetailPagination = resp.data.pagination
+    
+    return {orders, pagination}
+  }
+
+  async findOrder(id: string): Promise<Order | null> {
+    const filter = {filter:{ids:[id]}}
+    const params = serialize(filter, '')
+    console.log(params)
     const resp = await this.axios.get('/orders?' + params)
 
     if (!resp.data) throw new Error('RETAIL CRM ERROR')
 
     const orders = plainToClass(Order, resp.data.orders as Array<any>)
-    const pagination: RetailPagination = resp.data.pagination
 
-    return [orders, pagination]
-  }
-
-  async findOrder(id: string): Promise<Order | null> {
-    return
+    return orders[0]
   }
 
   async orderStatuses(): Promise<CrmType[]> {

@@ -7,6 +7,11 @@ export class OrdersResolver {
   constructor(private retailService: RetailService) {}
 
   @Query()
+  async getOrders(@Args('page') page: number) {
+    return this.retailService.orders({page})
+  }
+
+  @Query()
   async order(@Args('number') id: string) {
     return this.retailService.findOrder(id)
   }
